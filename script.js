@@ -1,7 +1,7 @@
 const $=i=>document.getElementById(i),R=n=>Math.floor(Math.random()*n);
 const cv=$('g'),c=cv.getContext('2d'),W=800,H=480,WALL=520,AIS=255;
 let mode='play',tasks=0,fatigue=0,needBreak=false,best=0,coins=0,owned=0,outfit=0,spd=0,scene='office',fade=0,day=1,jam=false,evT=45,msg='',msgT=0,sitT=0,clock=540,lastMin=-1,msgs=0,cur=null,ca=null,amb=4;
-const keys={},P={x:130,y:190,col:'#a78bfa',hair:'#ff7ab8',n:'Ты',z:1,mv:0,face:1};
+const keys={},P={x:130,y:190,col:'#1f2430',hair:'#15171d',n:'Ты',z:1,mv:0,face:1};
 const rr=(x,y,w,h,r)=>{c.beginPath();c.roundRect(x,y,w,h,r);c.fill()};
 
 /* ---------- мир ---------- */
@@ -12,7 +12,7 @@ const walls=[{x:WALL-4,y:0,w:8,h:200},{x:WALL-4,y:300,w:8,h:H-300},{x:0,y:0,w:W,
 const plants=[[24,50],[495,445],[565,50],[775,300]],pr=plants.map(([x,y])=>({x:x-12,y:y-12,w:24,h:24}));
 const printer={x:380,y:32,w:46,h:26},cooler={x:482,y:352,w:22,h:30};
 const shop={x:436,y:34,w:30,h:38},tbl={x:610,y:225,w:90,h:50};
-const OUT=['#a78bfa','#f472b6','#34d399','#fbbf24','#60a5fa'];
+const OUT=['#1f2430','#2a2f3f','#1e2a2a','#2b2228','#232b3a'];
 const solids=[...desks,arc,cof,sofa,...walls,...pr,printer,cooler,shop,tbl];
 const stations=[{k:'desk',...desks[0],label:'E — взять задачу'},{k:'arcade',...arc,label:'E — играть в аркаду'},
 {k:'coffee',...cof,label:'E — выпить кофе'},{k:'sofa',...sofa,label:'E — отдохнуть на диване'},{k:'shop',...shop,label:'E — магазин'},{k:'door',x:28,y:440,w:44,h:36,label:'E — выйти на улицу'},{k:'table',...tbl,label:'E — настольный теннис'},{k:'printer',...printer,label:'E — починить принтер'}];
@@ -84,7 +84,7 @@ function movePlayer(dt){
  if(keys.KeyA||keys.ArrowLeft)dx--;if(keys.KeyD||keys.ArrowRight)dx++;
  if(keys.KeyW||keys.ArrowUp)dy--;if(keys.KeyS||keys.ArrowDown)dy++;
  P.mv=dx||dy?1:0;if(!P.mv)return;P.face=dx||P.face;
- const l=Math.hypot(dx,dy),sp=150*(1+spd*.15)*(1-fatigue/300)*dt,nx=P.x+dx/l*sp,ny=P.y+dy/l*sp;
+ const l=Math.hypot(dx,dy),sp=100*(1+spd*.15)*(1-fatigue/300)*dt,nx=P.x+dx/l*sp,ny=P.y+dy/l*sp;
  const st=scene==='street';if(st||!hit(nx,P.y))P.x=nx;if(st||!hit(P.x,ny))P.y=ny;
  P.x=Math.max(10,Math.min(W-10,P.x));P.y=Math.max(10,Math.min(H-10,P.y));if(st)P.y=Math.max(250,Math.min(400,P.y));
 }
@@ -165,15 +165,15 @@ function reply(a,t){
  return pick(L.x);
 }
 function send(t,local){if(t.startsWith('Сыграем')&&ca){const a=ca;closeChat();startTtt(a);return}
- if(!t.trim()||!ca)return;add('me',t);$('ci').value='';beep(520,.06);const a=ca;
+ if(!t.trim()||!ca)return;busy=true;add('me',t);$('ci').value='';beep(520,.06);const a=ca;
  if(a.q&&norm(t)===norm(a.q.a)){a.q=null;a.need=false;coins+=5;a.fr=Math.min(10,a.fr+2);$('cn').textContent=a.n+' ❤'+Math.floor(a.fr);
-  setTimeout(()=>{add('bot','Верно, ты меня выручил! Спасибо!');say('+5 монет за помощь');beep(900,.2);hud()},400);return}
+  setTimeout(()=>{add('bot','Верно, ты меня выручил! Спасибо!');speak(a,'Верно, ты меня выручил! Спасибо!');say('+5 монет за помощь');beep(900,.2);hud()},400);return}
  const useAI=smp&&!local&&!/помо|подскаж|задач/i.test(t);hist.push('Игрок: '+t);
- (useAI?ask(a,t).catch(()=>reply(a,t)):new Promise(r=>setTimeout(()=>r(reply(a,t)),450))).then(ans=>{if(ca!==a)return;hist.push(a.n+': '+ans);add('bot',ans);a.fr=Math.min(10,a.fr+.5);$('cn').textContent=a.n+' ❤'+Math.floor(a.fr);beep(400,.06);
+ (useAI?ask(a,t).catch(()=>reply(a,t)):new Promise(r=>setTimeout(()=>r(reply(a,t)),450))).then(ans=>{if(ca!==a)return;hist.push(a.n+': '+ans);add('bot',ans);speak(a,ans);a.fr=Math.min(10,a.fr+.5);$('cn').textContent=a.n+' ❤'+Math.floor(a.fr);beep(400,.06);
   if(++msgs%3===0){fatigue=Math.max(0,fatigue-5);if(needBreak){needBreak=false;say('Душевно поболтали — перерыв засчитан.')}hud()}});
 }
-function openChat(a){hist=[];ca=a;a.talk=true;a.sayT=0;mode='chat';$('cn').textContent=a.n+' ❤'+Math.floor(a.fr);$('log').textContent='';$('chat').style.display='flex';add('bot',reply(a,'привет'));if(a.need&&!a.q){a.q=gens[R(gens.length)]();add('bot','Выручи, я застряла! Ответь: '+a.q.q)}$('ci').focus()}
-function closeChat(){if(ca){ca.talk=false;ca.last=clock}ca=null;$('chat').style.display='none';mode='play';for(const k in keys)keys[k]=false}
+function openChat(a){hist=[];ca=a;a.talk=true;a.sayT=0;mode='chat';$('cn').textContent=a.n+' ❤'+Math.floor(a.fr);$('log').textContent='';$('chat').style.display='flex';const g=reply(a,'привет');add('bot',g);let sp=g;if(a.need&&!a.q){a.q=gens[R(gens.length)]();add('bot','Выручи, я застряла! Ответь: '+a.q.q);sp+=' Выручи, я застряла! Загляни в чат.'}talkMode=!!SR;speak(a,sp);if(!matchMedia('(pointer:coarse)').matches)$('ci').focus()}
+function closeChat(){if(ca){ca.talk=false;ca.last=clock}ca=null;talkMode=false;busy=false;try{rec&&rec.abort();speechSynthesis.cancel()}catch(e){}$('chat').style.display='none';mode='play';for(const k in keys)keys[k]=false}
 ['Привет!','Как работа?','Пойдём на кофе?','Расскажи шутку','Помоги с задачей','Сыграем в крестики-нолики?'].forEach(t=>{const e=document.createElement('button');e.className='g';e.textContent=t;e.onclick=()=>send(t,1);$('qr').append(e)});
 $('cs').onclick=()=>send($('ci').value);$('cx').onclick=closeChat;
 $('ci').onkeydown=e=>{if(e.key==='Enter')send($('ci').value);if(e.key==='Escape')closeChat()};
@@ -185,10 +185,41 @@ async function ask(a,t){
  const p=`Ты — ${a.n}, ИИ-коллега в уютной офисной игре. Твой характер: ${a.L.hi} Отвечай по-русски, 1–2 коротких предложения, дружелюбно, с лёгким юмором. Дружба с игроком: ${Math.floor(a.fr)} из 10. Сейчас ты ${a.st==='rest'?'на перерыве':'работаешь'}. Диалог:\n${hist.slice(-8).join('\n')}\nОтветь только репликой ${a.n}, без имени в начале.`;
  const r=await smp(p,{modelTier:'quick',cache:false});return(r.text||'').trim()||reply(a,t);
 }
+/* ---------- голос: микрофон и озвучка ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,listening=false,voiceOn=true,talkMode=false,busy=false,voices=[];
+const VOI={'Алиса':[1.3,1.05],'Макс-бот':[.7,1],'Нейра':[1.55,1.1],'Гриша-GPT':[.95,.95]};
+function loadV(){voices=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('ru'))}
+try{loadV();speechSynthesis.onvoiceschanged=loadV}catch(e){}
+if(!SR)$('mic').textContent='🎤 Голос не поддерживается — пиши текстом';
+function listenSoon(){if(talkMode&&ca&&mode==='chat'&&!busy)startListen()}
+function speak(a,t){
+ busy=true;const done=()=>{busy=false;listenSoon()};
+ if(!voiceOn||!window.speechSynthesis){done();return}
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t),[p,r]=VOI[a.n]||[1,1];u.lang='ru-RU';u.pitch=p;u.rate=r;
+  if(voices.length)u.voice=voices[agents.indexOf(a)%voices.length];u.onend=done;u.onerror=done;speechSynthesis.speak(u)}catch(e){done()}
+}
+function micLabel(){$('mic').classList.toggle('on',listening);$('mic').textContent=listening?'🎙 Слушаю…':talkMode?'🎤 Разговор включён (нажми, чтобы выключить)':'🎤 Говорить'}
+function startListen(){
+ if(!SR||listening)return;
+ rec=new SR();rec.lang='ru-RU';rec.interimResults=false;
+ rec.onstart=()=>{listening=true;micLabel()};
+ rec.onresult=e=>{const t=e.results[0][0].transcript;$('ci').value=t;send(t)};
+ rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){talkMode=false;add('bot','Микрофон недоступен — разреши доступ или пиши текстом.')}};
+ rec.onend=()=>{listening=false;micLabel();if(talkMode&&ca&&mode==='chat'&&!busy)setTimeout(startListen,300)};
+ try{rec.start()}catch(e){listening=false}
+}
+$('mic').onclick=()=>{
+ if(!SR){add('bot','В этом браузере нет распознавания речи — пиши текстом.');return}
+ talkMode=!talkMode;if(talkMode){if(!busy)startListen()}else{try{rec.abort()}catch(e){}}micLabel();
+};
+$('vo').onclick=()=>{voiceOn=!voiceOn;$('vo').textContent=voiceOn?'🔊':'🔇';if(!voiceOn){try{speechSynthesis.cancel()}catch(e){}busy=false;listenSoon()}};
 /* ---------- выход, телефон ---------- */
 function esc(){if(mode==='arcade')endArcade();else if(mode==='pong'||mode==='ttt'){mode='play';for(const k in keys)keys[k]=false}}
 document.querySelectorAll('#pad [data-k]').forEach(b=>{const k=b.dataset.k,on=e=>{e.preventDefault();if(mode!=='task'&&mode!=='chat')keys[k]=true},off=()=>{keys[k]=false};b.onpointerdown=on;b.onpointerup=off;b.onpointerleave=off;b.onpointercancel=off});
 $('be').onclick=()=>{if(mode==='play')interact()};$('bx').onclick=esc;
+addEventListener('contextmenu',e=>{if(e.target.tagName!=='INPUT')e.preventDefault()});
+addEventListener('pointerdown',()=>{if(!matchMedia('(pointer:coarse)').matches||document.fullscreenElement)return;try{document.documentElement.requestFullscreen().then(()=>screen.orientation.lock('landscape')).catch(()=>{})}catch(e){}},{once:true});
 function rest(t){fatigue=Math.max(0,fatigue-25);needBreak=false;mode='play';for(const k in keys)keys[k]=false;say(t);hud()}
 /* ---------- настольный теннис ---------- */
 let pg=null;
@@ -224,7 +255,7 @@ function updateTtt(dt){
  if(gt.over){if((gt.end-=dt)<=0){const r=gt.res;coins+=r==='win'?5:r==='draw'?2:1;gt.a.fr=Math.min(10,gt.a.fr+1);rest(r==='win'?'Победа! +5 монет':r==='draw'?'Ничья! +2 монеты':'Проиграл, зато весело! +1 монета')}}
  else if(gt.wait>0&&(gt.wait-=dt)<=0){gt.b[aiMove(gt.b)]='O';beep(420,.06);chk()}
 }
-cv.onclick=e=>{if(mode!=='ttt')return;const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*H,cx=Math.floor((x-250)/100),cy=Math.floor((y-90)/100);if(cx>=0&&cx<3&&cy>=0&&cy<3)tPlay(cy*3+cx)};
+cv.onclick=e=>{if(mode!=='ttt')return;const r=cv.getBoundingClientRect(),rot=matchMedia('(pointer:coarse) and (orientation:portrait)').matches,x=rot?(e.clientY-r.top)/r.height*W:(e.clientX-r.left)/r.width*W,y=rot?(r.right-e.clientX)/r.width*H:(e.clientY-r.top)/r.height*H,cx=Math.floor((x-250)/100),cy=Math.floor((y-90)/100);if(cx>=0&&cx<3&&cy>=0&&cy<3)tPlay(cy*3+cx)};
 function drawTtt(){
  c.fillStyle='#1c2937';c.fillRect(0,0,W,H);c.strokeStyle='#52c7d2';c.lineWidth=4;
  for(let i=1;i<3;i++){c.beginPath();c.moveTo(250+i*100,90);c.lineTo(250+i*100,390);c.moveTo(250,90+i*100);c.lineTo(550,90+i*100);c.stroke()}
@@ -313,11 +344,11 @@ function bubble(x,y,t){
 function person(p,sit,em){
  const t=performance.now()/1000,bob=p.mv?Math.sin(t*12)*1.5:0,sw=p.mv?Math.sin(t*12)*3:0,x=p.x,y=p.y+(sit?4:0);
  c.fillStyle='rgba(0,0,0,.22)';c.beginPath();c.ellipse(x,y+10,10,4,0,0,7);c.fill();
- if(!sit){c.fillStyle=p.z?'#4b5563':'#2b3342';c.fillRect(x-6+sw,y+3,5,8);c.fillRect(x+1-sw,y+3,5,8);if(p.z){c.fillStyle='#fff';c.fillRect(x-7+sw,y+9,7,3);c.fillRect(x-sw,y+9,7,3)}}
+ if(!sit){c.fillStyle=p.z?'#1b1e27':'#2b3342';c.fillRect(x-6+sw,y+3,5,8);c.fillRect(x+1-sw,y+3,5,8);if(p.z){c.fillStyle='#2e3340';c.fillRect(x-7+sw,y+9,7,3);c.fillRect(x-sw,y+9,7,3)}}
  c.fillStyle=p.col;rr(x-(p.z?9:7),y-7+bob,p.z?18:14,13,4);
  c.fillStyle='#f0c8a0';c.beginPath();c.arc(x,y-12+bob,7,0,7);c.fill();
  c.fillStyle=p.hair;c.beginPath();c.arc(x,y-14+bob,7,Math.PI,0);c.fill();
- if(p.z){c.strokeStyle='#ff4fa3';c.lineWidth=2.5;c.beginPath();c.arc(x,y-13+bob,8.5,Math.PI,0);c.stroke();c.fillStyle='#ff4fa3';c.fillRect(x-11,y-14+bob,4,7);c.fillRect(x+7,y-14+bob,4,7)}
+ if(p.z){c.strokeStyle='#3a4152';c.lineWidth=2.5;c.beginPath();c.arc(x,y-13+bob,8.5,Math.PI,0);c.stroke();c.fillStyle='#3a4152';c.fillRect(x-11,y-14+bob,4,7);c.fillRect(x+7,y-14+bob,4,7)}
  c.fillStyle='#222';const f=p.face>0?1:-1;c.fillRect(x-3+f,y-12+bob,2,2);c.fillRect(x+2+f,y-12+bob,2,2);
  c.font='700 11px Nunito,sans-serif';c.textAlign='center';const w=c.measureText(p.n).width+10;
  c.fillStyle='rgba(20,30,40,.75)';rr(x-w/2,y+13,w,15,6);c.fillStyle='#fff';c.fillText(p.n,x,y+24);
