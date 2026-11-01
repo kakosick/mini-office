@@ -3,13 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mini office</title>
+<title>Mini-office</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/png" href="https://i.pinimg.com/564x/42/94/90/429490bf34e75ac1e0589d468cd4e07b.jpg">
-<style>
-
-</style>
 </head>
 <body>
 <div id="wrap">
@@ -22,6 +18,7 @@
 <span class="pill">Монеты: <b id="coins">0</b></span>
 <span id="note"></span>
 </div>
+<p id="rot">📱 Поверни телефон горизонтально — играть так удобнее.</p>
 <canvas id="g" width="800" height="480"></canvas>
 <p id="help">WASD или стрелки — ходить. E — действие: стол, аркада, кофе, диван или разговор с коллегой. Esc — выйти.</p>
 <div id="pad"><div class="dp"><button data-k="ArrowUp" aria-label="Вверх">▲</button><button data-k="ArrowLeft" aria-label="Влево">◀</button><button data-k="ArrowDown" aria-label="Вниз">▼</button><button data-k="ArrowRight" aria-label="Вправо">▶</button></div><div class="ab"><button id="be">E</button><button id="bx" class="g">Esc</button></div></div>
@@ -33,14 +30,13 @@
 <div class="row"><button id="tb">Ответить</button><button id="th" class="g">Подсказка</button><button id="tc" class="g">Отмена</button></div>
 </div>
 <div id="chat" class="ov">
-<div class="row" style="justify-content:space-between;align-items:center"><b id="cn"></b><button class="g" id="cx" aria-label="Закрыть чат">✕</button></div>
+<div class="row" style="justify-content:space-between;align-items:center"><b id="cn"></b><span><button class="g" id="vo" aria-label="Голос коллег">🔊</button> <button class="g" id="cx" aria-label="Закрыть чат">✕</button></span></div>
 <div id="log"></div>
 <div id="qr"></div>
-<div class="row"><input id="ci" autocomplete="off" placeholder="Напиши сообщение…" aria-label="Сообщение"><button id="cs">Отправить</button></div>
+<button id="mic">🎤 Говорить</button>
+<div class="row"><input id="ci" autocomplete="off" placeholder="Или напиши, если нужно…" aria-label="Сообщение"><button id="cs">Отправить</button></div>
 </div>
 </div>
-<script src="script.js">
-
-</script>
+<script src="script.js"></script>
 </body>
 </html>
